@@ -1,0 +1,5 @@
+# Jangan deploy ke Vercel (tetap di git untuk dev lokal).
+# Tanpa ini, server.js bisa diunduh publik karena Vercel menyajikan file root.
+server.js
+.env
+*.log

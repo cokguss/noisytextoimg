@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Kebijakan Privasi Noisy Text To IMG. Bagaimana data prompt dan gambar ditangani." />
+  <meta name="theme-color" content="#09090b" />
+  <title>Kebijakan Privasi | Noisy Text To IMG</title>
+  <link rel="icon" href="assets/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon-180.png" />
+  <link rel="preload" href="fonts/space-grotesk-700.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="fonts/fonts.css" />
+  <link rel="stylesheet" href="fonts/phosphor/style.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script>document.documentElement.classList.add('has-video')</script>
+</head>
+<body class="page-privacy">
+  <div class="bg-video" aria-hidden="true">
+    <video autoplay muted loop playsinline preload="metadata" poster="" id="bg-video-el">
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260808_064556_051587f1-74a1-4336-8c05-4dde3594ed05.mp4" type="video/mp4" />
+    </video>
+    <div class="bg-video-scrim" aria-hidden="true"></div>
+  </div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Noisy Text To IMG beranda">
+      <img class="brand-logo brand-logo--icon" src="assets/logo-icon.png" alt="" width="512" height="512" decoding="async" fetchpriority="high" aria-hidden="true" />
+      <span class="brand-name">NOISY <span class="brand-name-sub">TEXT TO IMG</span></span>
+    </a>
+    <nav class="header-nav" aria-label="Navigasi utama">
+      <a class="nav-link" href="/#faq">FAQ</a>
+      <a class="nav-link" href="privacy.html" aria-current="page">Privasi</a>
+      <span class="status-pill" data-state="idle">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-label">Privasi</span>
+      </span>
+    </nav>
+  </header>
+
+  <main class="privacy-main">
+    <article class="privacy-card">
+      <header class="privacy-hero">
+        <p class="privacy-kicker mono">legal · terakhir diperbarui 22 Sep 2026</p>
+        <h1 class="privacy-title">Kebijakan Privasi</h1>
+        <p class="privacy-lead">
+          Noisy Text To IMG dirancang seringan mungkin: kamu menulis prompt, gambar dirender,
+          tidak ada akun dan tidak ada database kami yang menyimpan isi prompt-mu.
+        </p>
+      </header>
+
+      <nav class="privacy-toc" aria-label="Daftar isi">
+        <p class="toc-label mono">di halaman ini</p>
+        <ol>
+          <li><a href="#ringkasan">Ringkasan singkat</a></li>
+          <li><a href="#data">Data yang diproses</a></li>
+          <li><a href="#prompt">Prompt &amp; hasil gambar</a></li>
+          <li><a href="#pihak-ketiga">Layanan pihak ketiga</a></li>
+          <li><a href="#cookie">Cookie &amp; penyimpanan lokal</a></li>
+          <li><a href="#keamanan">Keamanan</a></li>
+          <li><a href="#hak">Hak kamu</a></li>
+          <li><a href="#anak">Anak di bawah umur</a></li>
+          <li><a href="#perubahan">Perubahan kebijakan</a></li>
+          <li><a href="#kontak">Kontak</a></li>
+        </ol>
+      </nav>
+
+      <section class="privacy-section" id="ringkasan">
+        <h2>Ringkasan singkat</h2>
+        <div class="callout callout--ok">
+          <p><strong>Tidak kami simpan:</strong> prompt, negative prompt, dan file gambar hasil generate tidak disimpan di server kami sebagai riwayat akun.</p>
+        </div>
+        <ul class="privacy-list">
+          <li>Tidak perlu registrasi; kami tidak punya profil pengguna.</li>
+          <li>Prompt hanya dikirim saat kamu menekan <em>Buat Gambar</em>, lalu diteruskan ke layanan render untuk task tersebut.</li>
+          <li>Hasil berupa URL gambar sementara dari penyedia render; kami tidak membuat arsip galeri pribadi.</li>
+        </ul>
+      </section>
+
+      <section class="privacy-section" id="data">
+        <h2>Data yang diproses</h2>
+        <p>Saat kamu generate, request berisi minimal:</p>
+        <div class="privacy-table-wrap">
+          <table class="privacy-table">
+            <thead>
+              <tr>
+                <th>Jenis</th>
+                <th>Contoh</th>
+                <th>Tujuan</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="tag">prompt</span></td>
+                <td>Teks deskripsi gambar</td>
+                <td>Merender gambar yang kamu minta</td>
+              </tr>
+              <tr>
+                <td><span class="tag">negative prompt</span></td>
+                <td>Opsional, hal yang dihindari</td>
+                <td>Menyempurnakan hasil render</td>
+              </tr>
+              <tr>
+                <td><span class="tag">pengaturan</span></td>
+                <td>Model, CFG Scale</td>
+                <td>Parameter teknis generate</td>
+              </tr>
+              <tr>
+                <td><span class="tag">teknis</span></td>
+                <td>Task ID, status antrean</td>
+                <td>Polling status &amp; debugging error</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Kami <strong>tidak</strong> meminta nama, email, nomor telepon, atau pembayaran di aplikasi ini.</p>
+      </section>
+
+      <section class="privacy-section" id="prompt">
+        <h2>Prompt &amp; hasil gambar</h2>
+        <p>
+          Prompt diteruskan ke penyedia API render (live3d) untuk memproses task generate.
+          Setelah task selesai, gambar diambil lewat URL hasil (biasanya <span class="mono">temp.live3d.io</span>).
+        </p>
+        <ul class="privacy-list">
+          <li>Kami tidak menjual, menyewakan, atau memasarkan isi prompt-mu.</li>
+          <li>Kami tidak menampilkan prompt orang lain. Tidak ada feed publik di aplikasi ini.</li>
+          <li>URL gambar bersifat sementara mengikuti kebijakan penyedia; unduh ke perangkatmu bila ingin menyimpan permanen.</li>
+          <li>Jangan masukkan data pribadi (NIK, alamat, nomor identitas, dsb.) ke dalam prompt.</li>
+        </ul>
+      </section>
+
+      <section class="privacy-section" id="pihak-ketiga">
+        <h2>Layanan pihak ketiga</h2>
+        <div class="privacy-grid">
+          <div class="privacy-chip">
+            <p class="chip-name">Render API</p>
+            <p class="chip-desc">Memproses prompt → gambar. Memiliki log operasional sendiri sesuai kebijakan mereka.</p>
+          </div>
+          <div class="privacy-chip">
+            <p class="chip-name">Font &amp; ikon lokal</p>
+            <p class="chip-desc">Space Grotesk, JetBrains Mono, dan Phosphor di-host sendiri di situs ini. Tidak ada request ke CDN font pihak ketiga.</p>
+          </div>
+          <div class="privacy-chip">
+            <p class="chip-name">Contoh gambar</p>
+            <p class="chip-desc">Kartu contoh memakai picsum.photos (placeholder). Hanya dimuat sebagai inspirasi UI.</p>
+          </div>
+        </div>
+        <p>Tautan keluar dibuka dengan <span class="mono">rel="noopener"</span>. Kebijakan pihak ketiga di luar kendali kami.</p>
+      </section>
+
+      <section class="privacy-section" id="cookie">
+        <h2>Cookie &amp; penyimpanan lokal</h2>
+        <div class="callout">
+          <p><strong>Studi ini tidak memakai cookie tracking</strong> (tanpa analytics iklan, tanpa pixel retargeting, tanpa akun sesi).</p>
+        </div>
+        <ul class="privacy-list">
+          <li>Pengaturan UI di browser-mu (mis. prefers color scheme) mengikuti preferensi sistem.</li>
+          <li>Server hanya memproses request generate; tidak menetapkan cookie identifikasi pengguna di aplikasi kami.</li>
+          <li>Riwayat generate (prompt + URL hasil, maks 24) disimpan di <span class="mono">localStorage</span> browser-mu sendiri, tidak dikirim ke server. Hapus kapan saja dari bagian Riwayat atau via pengaturan browser.</li>
+          <li>Cache aset statis (CSS/JS) mungkin disimpan browser demi kecepatan. Itu standar HTTP, bukan pelacakan.</li>
+        </ul>
+      </section>
+
+      <section class="privacy-section" id="keamanan">
+        <h2>Keamanan</h2>
+        <ul class="privacy-list">
+          <li>Komunikasi browser ↔ server lokal memakai origin yang sama di pengembangan.</li>
+          <li>Request ke penyedia render memakai header teknis yang diperlukan endpoint tersebut.</li>
+          <li>Tidak ada penyimpanan hasil di disk server aplikasi sebagai “galeri” pengguna.</li>
+          <li>Tidak ada kata sandi untuk disimpan, karena memang tidak ada sistem login.</li>
+        </ul>
+        <p>Tidak ada sistem yang 100% bebas risiko. Jangan kirim materi rahasia lewat prompt.</p>
+      </section>
+
+      <section class="privacy-section" id="hak">
+        <h2>Hak kamu</h2>
+        <ul class="privacy-list checklist">
+          <li>Kamu mengontrol apa yang diketik di prompt. Itu satu-satunya &ldquo;data input utama&rdquo;.</li>
+          <li>Kamu bisa mengosongkan field kapan saja sebelum generate.</li>
+          <li>Kamu bisa menghapus file hasil unduhan dari perangkatmu sendiri.</li>
+          <li>Karena tidak ada akun, tidak ada data profil yang bisa kami &ldquo;hapus dari database&rdquo;. Memang tidak ada.</li>
+        </ul>
+      </section>
+
+      <section class="privacy-section" id="anak">
+        <h2>Anak di bawah umur</h2>
+        <p>
+          Layanan ini ditujukan untuk audiens umum. Jika kamu di bawah usia sesuai hukum yurisdiksimu
+          (mis. &lt; 13-18 tahun tergantung wilayah), gunakan hanya dengan izin wali.
+          Orang tua/wali yang mengkhawatirkan penggunaan anak dapat memantau penggunaan browser.
+        </p>
+      </section>
+
+      <section class="privacy-section" id="perubahan">
+        <h2>Perubahan kebijakan</h2>
+        <p>
+          Kebijakan ini dapat diperbarui sewaktu-waktu. Tanggal “terakhir diperbarui” di atas menunjukkan versi terkini.
+          Perubahan material (mis. penambahan penyimpanan riwayat) akan diusahakan ditandai jelas di halaman ini.
+        </p>
+      </section>
+
+      <section class="privacy-section" id="kontak">
+        <h2>Kontak</h2>
+        <p>
+          Pertanyaan soal privasi? Hubungi tim <strong>Noisy</strong> melalui kanal resmi proyek.
+          Sertakan deskripsi singkat request (tanpa mengirim ulang prompt sensitif bila tidak perlu).
+        </p>
+        <div class="privacy-actions">
+          <a class="btn btn--primary btn--sm" href="/">← Kembali ke studio</a>
+        </div>
+      </section>
+
+      <aside class="privacy-aside">
+        <p class="mono aside-kicker">catatan</p>
+        <p>Dokumen ini bahasa manusia untuk pengguna, bukan teks legal yang disalin dari template. Untuk kebutuhan komersial/enterprise, minta versi perjanjian resmi ke pemilik layanan.</p>
+      </aside>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <p class="mono footer-title">Noisy Text To IMG</p>
+      <p class="footer-note">Powered by Noisy. Studio text-to-image di browser.</p>
+      <p class="footer-copy mono">© 2026 Noisy. Untuk penggunaan belajar &amp; eksperimen.</p>
+    </div>
+    <nav class="footer-links" aria-label="Tautan footer">
+      <a href="/#keunggulan">Keunggulan</a>
+      <a href="/#tentang">Tentang</a>
+      <a href="/#faq">FAQ</a>
+      <a href="https://t.me/noisytechh" target="_blank" rel="noopener">Channel</a>
+      <a href="privacy.html" aria-current="page">Kebijakan Privasi</a>
+    </nav>
+  </footer>
+  <script>
+    (function(){
+      var v=document.getElementById('bg-video-el');
+      if(!v) return;
+      var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var saveData=navigator.connection && navigator.connection.saveData;
+      var smallScreen=window.matchMedia('(max-width: 768px)').matches;
+      if(reduced || saveData || smallScreen){ v.pause(); v.removeAttribute('autoplay'); v.preload='none'; var s=v.querySelector('source'); if(s) s.remove(); v.load(); return; }
+      var p=v.play(); if(p&&p.catch) p.catch(function(){});
+      window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', function(e){
+        if(e.matches) v.pause(); else v.play().catch(function(){});
+      });
+    })();
+  </script>
+</body>
+</html>

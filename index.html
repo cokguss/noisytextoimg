@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Noisy Text To IMG: studio text-to-image. Tulis prompt, dapatkan gambar." />
+  <meta name="theme-color" content="#09090b" />
+  <meta property="og:title" content="Noisy Text To IMG" />
+  <meta property="og:description" content="Studio text-to-image di browser: tanpa akun, tanpa install, tanpa GPU lokal." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/logo.png" />
+  <title>Noisy Text To IMG</title>
+  <link rel="icon" href="assets/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon-180.png" />
+  <link rel="preload" href="fonts/space-grotesk-700.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="fonts/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="fonts/fonts.css" />
+  <link rel="stylesheet" href="fonts/phosphor/style.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script>document.documentElement.classList.add('has-video')</script>
+</head>
+<body>
+  <!-- Splash loading: planet orbit + progress, hilang sendiri via js/app.js -->
+  <div class="splash" id="splash" role="status" aria-live="polite" aria-label="Memuat studio">
+    <div class="splash__stars" aria-hidden="true"></div>
+    <div class="splash__scene">
+      <div class="mark-loader" aria-hidden="true">
+        <img src="assets/logo-icon.png" alt="" width="512" height="512" decoding="async" />
+        <span class="mark-orbit"></span>
+        <span class="mark-orbit mark-orbit--b"></span>
+      </div>
+      <p class="splash__word">NOISY<span>TEXT TO IMG</span></p>
+      <p class="splash__tag">studio text-to-image</p>
+      <div class="splash__track" aria-hidden="true"><span class="splash__bar" id="splashBar"></span></div>
+      <p class="splash__count" aria-hidden="true"><span id="splashCount">00</span> / 100</p>
+    </div>
+  </div>
+  <noscript><style>.splash{display:none !important}</style></noscript>
+
+  <div class="bg-video" aria-hidden="true">
+    <video autoplay muted loop playsinline preload="metadata" poster="" id="bg-video-el">
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260808_064556_051587f1-74a1-4336-8c05-4dde3594ed05.mp4" type="video/mp4" />
+    </video>
+    <div class="bg-video-scrim" aria-hidden="true"></div>
+  </div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Noisy Text To IMG beranda">
+      <img class="brand-logo brand-logo--icon" src="assets/logo-icon.png" alt="" width="512" height="512" decoding="async" fetchpriority="high" aria-hidden="true" />
+      <span class="brand-name">NOISY <span class="brand-name-sub">TEXT TO IMG</span></span>
+    </a>
+    <nav class="header-nav" aria-label="Navigasi utama">
+      <a class="nav-link" href="#keunggulan">Keunggulan</a>
+      <a class="nav-link" href="#riwayat">Riwayat</a>
+      <a class="nav-link" href="#tentang">Tentang</a>
+      <a class="nav-link" href="#faq">FAQ</a>
+      <a class="nav-link" href="privacy.html">Privasi</a>
+      <span class="status-pill" id="api-status" data-state="idle">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-label">Siap</span>
+      </span>
+    </nav>
+  </header>
+
+  <main class="workspace">
+    <aside class="panel" aria-label="Pengaturan generate">
+      <form id="gen-form" novalidate>
+        <div class="field field--prompt">
+          <div class="field-head">
+            <label for="prompt">Deskripsi gambar</label>
+            <span class="field-count" id="prompt-count" aria-live="polite">0 / 2000</span>
+          </div>
+          <textarea
+            id="prompt"
+            name="prompt"
+            rows="6"
+            maxlength="2000"
+            placeholder="Cth: portrait wanita dengan jaket reflektif, cahaya neon kota hujan, shot 85mm…"
+            required
+          ></textarea>
+          <p class="field-error" id="prompt-error" hidden>Tulis prompt dulu sebelum generate.</p>
+          <div class="prompt-tools">
+            <button type="button" class="chip-btn" id="random-prompt-btn" title="Acak prompt contoh">
+              <i class="ph ph-dice-five" aria-hidden="true"></i>
+              Acak
+            </button>
+            <span class="preset-chips" role="group" aria-label="Preset gaya prompt">
+              <button type="button" class="chip-btn preset-chip" data-preset="cinematic still, anamorphic lens flare, moody teal-orange grade, 35mm film">Cinematic</button>
+              <button type="button" class="chip-btn preset-chip" data-preset="editorial portrait, soft window light, kodak portra 400, shallow depth of field">Editorial</button>
+              <button type="button" class="chip-btn preset-chip" data-preset="anime illustration, vibrant colors, detailed line art, studio lighting">Anime</button>
+              <button type="button" class="chip-btn preset-chip" data-prompt-append=", ultra detailed, 8k, sharp focus">Detail +</button>
+            </span>
+          </div>
+        </div>
+
+        <details class="field field--neg" id="neg-details">
+          <summary>
+            <span class="summary-label">Prompt negatif</span>
+            <span class="summary-hint">opsional</span>
+            <span class="summary-chevron" aria-hidden="true">
+              <i class="ph ph-caret-down"></i>
+            </span>
+          </summary>
+          <div class="neg-body" id="neg-body" data-details-body>
+            <div class="neg-inner">
+              <label class="sr-only" for="negative-prompt">Prompt negatif</label>
+              <textarea
+                id="negative-prompt"
+                name="negativePrompt"
+                rows="3"
+                maxlength="1000"
+                placeholder="Hal yang ingin dihindari: blur, watermark, bad anatomy…"
+              ></textarea>
+            </div>
+          </div>
+        </details>
+
+        <div class="field field--model" data-model-picker>
+          <span class="field-label-text" id="model-picker-label">Model</span>
+          <input type="hidden" name="model" id="model" value="AbsoluteReality_v1.8.1.safetensors" />
+          <button
+            type="button"
+            class="model-trigger"
+            id="model-trigger"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-labelledby="model-picker-label model-trigger-name"
+          >
+            <span class="model-badge" aria-hidden="true">
+              <i class="ph ph-cube"></i>
+            </span>
+            <span class="model-texts">
+              <span class="model-name" id="model-trigger-name">AbsoluteReality v1.8</span>
+              <span class="model-desc" id="model-trigger-desc">Fotorealisme detail tinggi</span>
+            </span>
+            <span class="model-rec" id="model-rec">Terbaik</span>
+            <span class="model-chevron" aria-hidden="true">
+              <i class="ph ph-caret-down"></i>
+            </span>
+          </button>
+          <div class="model-menu" id="model-menu" role="listbox" aria-labelledby="model-picker-label" hidden>
+            <div
+              class="model-option is-selected"
+              role="option"
+              aria-selected="true"
+              tabindex="-1"
+              data-value="AbsoluteReality_v1.8.1.safetensors"
+              data-name="AbsoluteReality v1.8"
+              data-desc="Fotorealisme detail tinggi"
+            >
+              <span class="opt-check" aria-hidden="true">
+                <i class="ph ph-check"></i>
+              </span>
+              <span class="opt-texts">
+                <span class="opt-name">AbsoluteReality v1.8</span>
+                <span class="opt-desc">Fotorealisme detail tinggi</span>
+              </span>
+              <span class="opt-badge">Terbaik</span>
+            </div>
+            <div
+              class="model-option"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+              data-value="majicmixRealistic_v7.safetensors"
+              data-name="majicmix Realistic v7"
+              data-desc="Potret manusia alami"
+            >
+              <span class="opt-check" aria-hidden="true">
+                <i class="ph ph-check"></i>
+              </span>
+              <span class="opt-texts">
+                <span class="opt-name">majicmix Realistic v7</span>
+                <span class="opt-desc">Potret manusia alami</span>
+              </span>
+            </div>
+            <div
+              class="model-option"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+              data-value="meinamix_meinaV11.safetensors"
+              data-name="MeinaMix v11"
+              data-desc="Gaya anime / illustration"
+            >
+              <span class="opt-check" aria-hidden="true">
+                <i class="ph ph-check"></i>
+              </span>
+              <span class="opt-texts">
+                <span class="opt-name">MeinaMix v11 (Anime)</span>
+                <span class="opt-desc">Gaya anime / illustration</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field field--ratio">
+          <span class="field-label-text" id="ratio-label">Aspect ratio</span>
+          <input type="hidden" name="ratio" id="ratio" value="1:1" />
+          <div class="ratio-group" role="radiogroup" aria-labelledby="ratio-label">
+            <button type="button" class="ratio-opt is-selected" role="radio" aria-checked="true" data-ratio="1:1" data-w="1024" data-h="1024" title="Persegi">
+              <span class="ratio-icon ratio-icon--sq" aria-hidden="true"></span>
+              <span>1:1</span>
+            </button>
+            <button type="button" class="ratio-opt" role="radio" aria-checked="false" data-ratio="16:9" data-w="1024" data-h="576" title="Lanskap lebar">
+              <span class="ratio-icon ratio-icon--wide" aria-hidden="true"></span>
+              <span>16:9</span>
+            </button>
+            <button type="button" class="ratio-opt" role="radio" aria-checked="false" data-ratio="4:3" data-w="1024" data-h="768" title="Lanskap">
+              <span class="ratio-icon ratio-icon--43" aria-hidden="true"></span>
+              <span>4:3</span>
+            </button>
+            <button type="button" class="ratio-opt" role="radio" aria-checked="false" data-ratio="9:16" data-w="576" data-h="1024" title="Potret / story">
+              <span class="ratio-icon ratio-icon--tall" aria-hidden="true"></span>
+              <span>9:16</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="field field--cfg">
+          <div class="field-head">
+            <label for="cfg">CFG Scale</label>
+            <output class="cfg-value" id="cfg-value" for="cfg">7</output>
+          </div>
+          <input type="range" id="cfg" name="cfg" min="1" max="20" step="1" value="7" />
+        </div>
+
+        <button type="submit" class="btn btn--primary" id="generate-btn">
+          <span class="btn-label">Buat Gambar</span>
+          <span class="btn-busy" aria-hidden="true"></span>
+        </button>
+        <p class="panel-hint">
+          <kbd>Ctrl</kbd> + <kbd>Enter</kbd> untuk generate cepat
+        </p>
+      </form>
+    </aside>
+
+    <section class="stage" id="stage" data-state="empty" aria-live="polite" aria-label="Hasil generate">
+      <!-- EMPTY -->
+      <div class="stage-view stage-empty" data-view="empty">
+        <div class="empty-frame">
+          <div class="scanline" aria-hidden="true"></div>
+          <div class="empty-copy">
+            <p class="empty-kicker">canvas kosong</p>
+            <h1 class="empty-title">Apa yang ingin<br />kamu bayangkan?</h1>
+            <p class="empty-sub">Tulis prompt di panel kiri, tekan Buat Gambar.</p>
+          </div>
+        </div>
+
+        <div class="examples" aria-label="Contoh prompt">
+          <p class="examples-label">Atau mulai dari contoh</p>
+          <div class="example-grid">
+            <button type="button" class="example-card" data-prompt="(masterpiece), cyberpunk street market at night, rain reflections, neon signs in japanese, cinematic lighting, 35mm film grain">
+              <img src="https://picsum.photos/seed/noisy-cyberpunk/400/300" alt="" width="400" height="300" loading="lazy" />
+              <span class="example-text">Cyberpunk street market, neon rain</span>
+            </button>
+            <button type="button" class="example-card" data-prompt="(masterpiece), editorial portrait of an astronaut botanist, greenhouse light, soft shadows, kodak portra 400, shallow depth of field">
+              <img src="https://picsum.photos/seed/noisy-astronaut/400/300" alt="" width="400" height="300" loading="lazy" />
+              <span class="example-text">Portrait astronaut botanist, editorial</span>
+            </button>
+            <button type="button" class="example-card" data-prompt="(masterpiece), brutalist concrete chapel on a foggy cliff, morning light rays, architectural photography, large format">
+              <img src="https://picsum.photos/seed/noisy-chapel/400/300" alt="" width="400" height="300" loading="lazy" />
+              <span class="example-text">Brutalist chapel in fog, architectural</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOADING -->
+      <div class="stage-view stage-loading" data-view="loading" hidden>
+        <div class="load-body">
+          <div class="mark-loader" aria-hidden="true">
+            <img src="assets/logo-icon.png" alt="" width="512" height="512" loading="lazy" decoding="async" />
+            <span class="mark-orbit"></span>
+            <span class="mark-orbit mark-orbit--b"></span>
+          </div>
+          <p class="load-status" id="load-status">Mengirim prompt…</p>
+          <div class="progress-track">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <p class="mono gen-count" aria-hidden="true"><span id="load-pct">04</span> / 100</p>
+          <div class="load-meta">
+            <span class="mono" id="load-task">task · -</span>
+            <span class="mono" id="load-attempt">poll · 0/30</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULT -->
+      <div class="stage-view stage-result" data-view="result" hidden>
+        <div class="result-frame">
+          <img id="result-img" alt="Hasil generate" />
+          <div class="result-sheen" aria-hidden="true"></div>
+        </div>
+        <div class="result-toolbar">
+          <div class="result-meta">
+            <span class="meta-chip">
+              <span class="meta-label">model</span>
+              <span class="mono meta-value" id="result-model">-</span>
+            </span>
+            <span class="meta-chip">
+              <span class="meta-label">cfg</span>
+              <span class="mono meta-value" id="result-cfg">7</span>
+            </span>
+            <span class="meta-chip">
+              <span class="meta-label">ratio</span>
+              <span class="mono meta-value" id="result-ratio">1:1</span>
+            </span>
+          </div>
+          <div class="result-actions">
+            <button type="button" class="btn btn--ghost" id="share-btn">
+              <i class="ph ph-share-network" aria-hidden="true"></i>
+              <span class="btn-text">Bagikan</span>
+            </button>
+            <button type="button" class="btn btn--ghost" id="copy-btn">
+              <i class="ph ph-copy" aria-hidden="true"></i>
+              <span class="btn-text">Salin prompt</span>
+            </button>
+            <button type="button" class="btn btn--ghost" id="regen-btn">
+              <i class="ph ph-arrow-clockwise" aria-hidden="true"></i>
+              Buat ulang
+            </button>
+            <a class="btn btn--primary btn--sm" id="download-btn" href="#" download="noisy-generate.webp">
+              <i class="ph ph-download-simple" aria-hidden="true"></i>
+              Unduh
+            </a>
+          </div>
+        </div>
+        <p class="result-prompt" id="result-prompt"></p>
+      </div>
+
+      <!-- ERROR -->
+      <div class="stage-view stage-error" data-view="error" hidden>
+        <div class="error-card">
+          <i class="ph ph-warning-circle error-icon" aria-hidden="true"></i>
+          <h2 class="error-title">Generate gagal</h2>
+          <p class="error-msg" id="error-msg">Terjadi kesalahan yang tidak diketahui.</p>
+          <button type="button" class="btn btn--primary" id="retry-btn">Coba lagi</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section class="history-section" id="riwayat" aria-label="Riwayat generate">
+    <div class="history-wrap reveal">
+      <header class="history-header">
+        <div>
+          <h2 class="history-title">Riwayat generate.</h2>
+          <p class="history-sub">Tersimpan lokal di browser ini saja — tidak dikirim ke server kami. Maksimal 24 terakhir.</p>
+        </div>
+        <button type="button" class="btn btn--ghost btn--sm" id="history-clear" hidden>Hapus semua</button>
+      </header>
+      <p class="history-empty" id="history-empty">Belum ada riwayat. Hasil generate-mu akan muncul di sini.</p>
+      <div class="history-grid" id="history-grid" role="list"></div>
+    </div>
+  </section>
+
+  <section class="feature-section" id="keunggulan" aria-label="Keunggulan">
+    <div class="feature-wrap reveal">
+      <header class="feature-header">
+        <h2 class="feature-title">Text-to-image tanpa ribet.</h2>
+        <p class="feature-sub">Studio ringan di browser: tanpa akun, tanpa install, tanpa GPU lokal.</p>
+      </header>
+      <div class="feature-bento">
+        <article class="feature-card feature-card--lead">
+          <i class="ph ph-stack feature-icon" aria-hidden="true"></i>
+          <h3 class="feature-name">3 model siap pakai</h3>
+          <p class="feature-desc">Fotorealisme, potret alami, dan anime. Tinggal pilih, langsung render.</p>
+        </article>
+        <article class="feature-card">
+          <i class="ph ph-timer feature-icon" aria-hidden="true"></i>
+          <h3 class="feature-name">Hasil dalam detik</h3>
+          <p class="feature-desc">Progress bar real-time. Umumnya 15-60 detik tergantung antrean server.</p>
+        </article>
+        <article class="feature-card feature-card--grad">
+          <i class="ph ph-lock-key feature-icon" aria-hidden="true"></i>
+          <h3 class="feature-name">Privasi-first</h3>
+          <p class="feature-desc">Tanpa akun. Prompt hanya dikirim saat kamu menekan generate. Tidak ada riwayat di sisi kami.</p>
+        </article>
+        <article class="feature-card">
+          <i class="ph ph-sliders-horizontal feature-icon" aria-hidden="true"></i>
+          <h3 class="feature-name">CFG &amp; ratio kontrol</h3>
+          <p class="feature-desc">Geser CFG Scale dan pilih aspect ratio (1:1, 16:9, 4:3, 9:16) sesuai kebutuhan.</p>
+        </article>
+        <article class="feature-card">
+          <i class="ph ph-magic-wand feature-icon" aria-hidden="true"></i>
+          <h3 class="feature-name">Prompt helpers</h3>
+          <p class="feature-desc">Chip preset gaya (cinematic, editorial, anime) dan tombol acak prompt untuk inspirasi cepat.</p>
+        </article>
+        <article class="feature-card feature-card--wide">
+          <i class="ph ph-download-simple feature-icon" aria-hidden="true"></i>
+          <div class="feature-wide-text">
+            <h3 class="feature-name">Salin, unduh, bagikan</h3>
+            <p class="feature-desc">Prompt bisa disalin, gambar diunduh, atau hasil dibagikan langsung dari panel hasil.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq-section" id="faq" aria-label="FAQ dan cara penggunaan">
+    <div class="faq-wrap reveal">
+      <header class="faq-header">
+        <h2 class="faq-title">Cara pakai &amp; FAQ</h2>
+        <p class="faq-sub">Mulai dalam hitungan detik, tanpa akun dan tanpa install.</p>
+      </header>
+
+      <div class="howto-row">
+        <article class="howto-step">
+          <h3 class="howto-title">Tulis prompt</h3>
+          <p class="howto-desc">Deskripsikan gambar di panel kiri. Semakin detail subjek, cahaya, dan gaya, semakin bagus hasilnya.</p>
+        </article>
+        <article class="howto-step">
+          <h3 class="howto-title">Atur model &amp; CFG</h3>
+          <p class="howto-desc">Pilih model (fotorealisme / anime) dan geser CFG Scale. CFG 5-8 umumnya seimbang antara kreativitas dan kepatuhan prompt.</p>
+        </article>
+        <article class="howto-step">
+          <h3 class="howto-title">Generate &amp; unduh</h3>
+          <p class="howto-desc">Tekan <strong>Buat Gambar</strong> atau <kbd>Ctrl</kbd>+<kbd>Enter</kbd>. Setelah selesai, salin prompt, buat ulang, atau unduh hasilnya.</p>
+        </article>
+      </div>
+
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>
+            <span>Apa itu Noisy Text To IMG?</span>
+            <span class="faq-chevron" aria-hidden="true">
+              <i class="ph ph-caret-down"></i>
+            </span>
+          </summary>
+          <div class="faq-body" data-details-body><div class="faq-inner">
+            Studio text-to-image di browser. Kamu menulis deskripsi, kami merender gambar lewat model diffusion. Tidak perlu akun atau GPU lokal.
+          </div></div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span>Bagaimana cara menghasilkan gambar terbaik?</span>
+            <span class="faq-chevron" aria-hidden="true">
+              <i class="ph ph-caret-down"></i>
+            </span>
+          </summary>
+          <div class="faq-body" data-details-body><div class="faq-inner">
+            Tulis prompt spesifik: subjek, pencahayaan, lensa/sudut, gaya (mis. cinematic, editorial, 35mm film). Gunakan prompt negatif untuk menyingkirkan artefak (blur, watermark, bad anatomy). Coba beberapa model bila hasil kurang cocok.
+          </div></div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span>Model mana yang sebaiknya dipilih?</span>
+            <span class="faq-chevron" aria-hidden="true">
+              <i class="ph ph-caret-down"></i>
+            </span>
+          </summary>
+          <div class="faq-body" data-details-body><div class="faq-inner">
+            <strong>AbsoluteReality v1.8:</strong> fotorealisme detail tinggi (default).<br />
+            <strong>majicmix Realistic v7:</strong> potret manusia alami.<br />
+            <strong>MeinaMix v11:</strong> gaya anime / ilustrasi.
+          </div></div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span>Apa itu CFG Scale?</span>
+            <span class="faq-chevron" aria-hidden="true">
+              <i class="ph ph-caret-down"></i>
+            </span>
+          </summary>
+          <div class="faq-body" data-details-body><div class="faq-inner">
+            CFG mengontrol seberapa ketat model mengikuti prompt. Rendah (1-4) lebih bebas/artistik; tinggi (12-20) lebih literal tapi bisa berlebihan. Rentang nyaman untuk sebagian besar kasus: <strong>5-9</strong>.
+          </div></div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span>Berapa lama proses generate?</span>
+            <span class="faq-chevron" aria-hidden="true">
+              <i class="ph ph-caret-down"></i>
+            </span>
+          </summary>
+          <div class="faq-body" data-details-body><div class="faq-inner">
+            Umumnya sekitar 15-60 detik tergantung antrean server. Progress bar menampilkan status render; kalau timeout, tekan <em>Coba lagi</em>.
+          </div></div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span>Apakah gambar &amp; prompt saya disimpan?</span>
+            <span class="faq-chevron" aria-hidden="true">
+              <i class="ph ph-caret-down"></i>
+            </span>
+          </summary>
+          <div class="faq-body" data-details-body><div class="faq-inner">
+            Tidak ada database kami yang menyimpan prompt atau hasil. Prompt hanya dikirim saat kamu menekan generate. Detail lengkap di <a href="privacy.html">Kebijakan Privasi</a>.
+          </div></div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span>Di mana riwayat generate saya disimpan?</span>
+            <span class="faq-chevron" aria-hidden="true">
+              <i class="ph ph-caret-down"></i>
+            </span>
+          </summary>
+          <div class="faq-body" data-details-body><div class="faq-inner">
+            Hanya di browser-mu sendiri (localStorage), maksimal 24 terakhir — tidak pernah dikirim ke server kami. Hapus per item atau semuanya dari bagian <a href="#riwayat">Riwayat</a>, atau bersihkan data situs di pengaturan browser.
+          </div></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-section" id="tentang" aria-label="Tentang developer">
+    <div class="about-wrap reveal">
+      <header class="about-header">
+        <h2 class="about-title">Dibangun oleh Noisy &amp; BloodSkill.</h2>
+        <p class="about-sub">Noisy Text To IMG adalah studio text-to-image belajar &amp; eksperimen. Ringan, jujur soal privasi, dan gratis dipakai. Didukung BloodSkill sebagai support system.</p>
+      </header>
+      <div class="about-grid">
+        <article class="about-card about-card--noisy">
+          <div class="about-avatar about-avatar--photo" aria-hidden="true">
+            <img src="assets/noisy.jpg" alt="" width="72" height="72" loading="lazy" decoding="async" />
+            <span class="avatar-ring"></span>
+            <span class="avatar-sheen"></span>
+          </div>
+          <div class="about-body">
+            <p class="about-role mono"><span class="role-dot"></span>developer</p>
+            <h3 class="about-name">Noisy</h3>
+            <p class="about-desc">Penggerak studio Noisy Text To IMG. Fokus pada tool web ringan yang bisa langsung dipakai tanpa akun.</p>
+            <div class="about-links">
+              <a class="about-link" href="https://t.me/noisy02" target="_blank" rel="noopener">Telegram</a>
+              <a class="about-link" href="https://github.com/cokguss" target="_blank" rel="noopener">GitHub</a>
+            </div>
+          </div>
+        </article>
+        <article class="about-card about-card--blood">
+          <div class="about-avatar about-avatar--photo about-avatar--blood" aria-hidden="true">
+            <img src="assets/bloodskill.jpg" alt="" width="72" height="72" loading="lazy" decoding="async" />
+            <span class="avatar-ring"></span>
+            <span class="avatar-ping"></span>
+          </div>
+          <div class="about-body">
+            <p class="about-role mono"><span class="role-dot"></span>support system</p>
+            <h3 class="about-name">BloodSkill</h3>
+            <p class="about-desc">Support system website sekaligus pengembang XtremeUbot.</p>
+            <div class="about-links">
+              <a class="about-link" href="https://t.me/bloodskil2" target="_blank" rel="noopener">Telegram</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="channel-section" id="channel" aria-label="Channel Telegram">
+    <div class="channel-wrap reveal">
+      <div class="channel-copy">
+        <h2 class="channel-title">Ikuti channel Noisytech.</h2>
+        <p class="channel-sub">Update tool, hasil eksperimen, dan info terbaru — langsung di Telegram.</p>
+      </div>
+      <div class="channel-cta">
+        <a class="btn btn--primary channel-btn" href="https://t.me/noisytechh" target="_blank" rel="noopener">
+          <i class="ph ph-paper-plane-tilt" aria-hidden="true"></i>
+          Buka Channel
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <p class="mono footer-title">Noisy Text To IMG</p>
+      <p class="footer-note">Powered by Noisy. Studio text-to-image di browser.</p>
+      <p class="footer-copy mono">© 2026 Noisy. Untuk penggunaan belajar &amp; eksperimen.</p>
+    </div>
+    <nav class="footer-links" aria-label="Tautan footer">
+      <a href="#keunggulan">Keunggulan</a>
+      <a href="#riwayat">Riwayat</a>
+      <a href="#tentang">Tentang</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://t.me/noisytechh" target="_blank" rel="noopener">Channel</a>
+      <a href="privacy.html">Kebijakan Privasi</a>
+    </nav>
+  </footer>
+
+  <!-- Konfirmasi hapus riwayat: modal custom, bukan dialog browser -->
+  <div class="confirm-backdrop" id="confirm-clear" hidden>
+    <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirm-clear-title">
+      <span class="confirm-icon" aria-hidden="true">
+        <i class="ph ph-warning"></i>
+      </span>
+      <h2 class="confirm-title" id="confirm-clear-title">Hapus seluruh riwayat?</h2>
+      <p class="confirm-desc" id="confirm-clear-desc">Tindakan ini permanen dan hanya menghapus data di browser ini.</p>
+      <div class="confirm-actions">
+        <button type="button" class="btn btn--ghost" id="confirm-clear-cancel">Batal</button>
+        <button type="button" class="btn btn--danger" id="confirm-clear-ok">Ya, hapus</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
