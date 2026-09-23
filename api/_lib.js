@@ -1,8 +1,9 @@
-/* Shared logic untuk lokal (server.js) & Vercel functions (api/*.js).
-   Tanpa side effect: tidak listen, tidak pasang route.
+/* Shared logic untuk Vercel functions (api/*.js).
+   Sumber kebenaran logika ada di engine.js (ikut ter-deploy).
    CATATAN: guard + limiter di sini duplikat kecil dari server.js
-   (sengaja, agar tidak circular-require). Ubah di dua tempat bila perlu. */
-const server = require("../server.js");
+   (sengaja, agar fungsi serverless tidak menarik seluruh Express app).
+   Ubah di dua tempat bila perlu. */
+const engine = require("./_engine");
 
 const apiHits = new Map();
 
@@ -52,7 +53,7 @@ function clientKey(req, name) {
 }
 
 module.exports = {
-  ...server,
+  ...engine,
   setSecurityHeaders,
   sameOriginOk,
   rateOk,

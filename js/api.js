@@ -13,15 +13,41 @@ const NoisyAPI = (() => {
 
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+  // Bedakan kegagalan jaringan (fetch menolak / res non-JSON: server mati,
+  // fungsi Vercel crash) dari error API asli (JSON {status:false, error}).
+  function isNetworkError(err) {
+    return (
+      err instanceof TypeError /* fetch gagal: DNS/offline/CORS */ ||
+      err?.name === "AbortError" ||
+      err?.name === "APIHTTPError" ||
+      err?.name === "APINoJSON"
+    );
+  }
+
   async function post(path, body) {
     const res = await fetch(API_BASE + path, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-    const json = await res.json().catch(() => ({}));
+    const text = await res.text().catch(() => "");
+    let json = {};
+    try {
+      json = JSON.parse(text);
+    } catch {
+      json = {};
+    }
     if (!res.ok || json.status === false) {
-      throw new Error(json.error || `HTTP ${res.status}`);
+      if (!json.error) {
+        // Bukan JSON error dari API → kemungkinan besar jaringan/gateway
+        const e = new Error(`HTTP ${res.status}`);
+        e.name = res.ok ? "APINoJSON" : "APIHTTPError";
+        e.httpStatus = res.status;
+        throw e;
+      }
+      const e = new Error(json.error);
+      e.httpStatus = res.status;
+      throw e;
     }
     return json;
   }
@@ -77,7 +103,12 @@ const NoisyAPI = (() => {
         taskId,
       });
     } catch (err) {
-      // Server down / offline → demo mode supaya UI tetap jalan
+      if (!isNetworkError(err)) {
+        // Error asli dari API (mis. belum dikonfigurasi, rate limit, 403):
+        // tampilkan apa adanya, JANGAN samarkan jadi mode demo.
+        throw err;
+      }
+      // Server down / offline murni → demo mode supaya UI tetap jalan
       mode = "demo";
       onMode("demo");
       taskId = "demo-" + Math.random().toString(36).slice(2, 10);
