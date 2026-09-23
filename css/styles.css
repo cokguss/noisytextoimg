@@ -3514,6 +3514,12 @@ html.js .reveal.is-visible {
     grid-column: span 1;
   }
 
+  /* Reset span 2 dari breakpoint 900px: di grid 1 kolom, span 2 membuat
+     kolom implicit sempit dan merusak seluruh bento. */
+  .feature-card:nth-child(5) {
+    grid-column: span 1;
+  }
+
   .feature-card--wide {
     flex-direction: column;
     align-items: flex-start;
